@@ -49,7 +49,7 @@ setInterval(async () => {
   for (const profile of profiles) {
     addToQueue(() => crawlUnreadMessages(profile));
   }
-}, 1 * 60 * 1000);
+}, 5 * 60 * 1000);
 
 (async () => {
   setInterval(() => {

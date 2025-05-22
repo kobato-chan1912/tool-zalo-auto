@@ -116,7 +116,7 @@ async function crawlUnreadMessages(profile) {
                 if (fileName) {
                     filePath = path.resolve("downloads", fileName);
                     await page.click(`${msgSelector} .download`);
-                    await sleep(50000)
+                    await sleep(30000)
                     // Optionally wait or move file after downloaded
                 }
 
