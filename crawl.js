@@ -100,10 +100,11 @@ async function crawlUnreadMessages(profile) {
 
 
                 let imagePath = null;
+                const downloadFolder = process.env.DOWNLOAD_PATH
+
 
                 if (base64Image) {
                     // Step 2: write file in Node.js context
-                    const downloadFolder = process.env.DOWNLOAD_PATH
                     imagePath = path.resolve(downloadFolder, `image_${Date.now()}.jpg`);
                     const buffer = Buffer.from(base64Image, "base64");
                     fs.writeFileSync(imagePath, buffer);
@@ -114,7 +115,7 @@ async function crawlUnreadMessages(profile) {
                 const fileName = await page.$eval(`${msgSelector} .file-message__content-title`, el => el.textContent).catch(() => null);
                 let filePath = null;
                 if (fileName) {
-                    filePath = path.resolve("downloads", fileName);
+                    filePath = path.resolve(downloadFolder, fileName);
                     await page.click(`${msgSelector} .download`);
                     await sleep(30000)
                     // Optionally wait or move file after downloaded
