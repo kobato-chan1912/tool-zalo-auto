@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "axios": "^1.9.0",
+    "chalk": "^4.1.2",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.5.0",
+    "env": "^0.0.2",
+    "msnodesqlv8": "^4.5.0",
+    "mssql": "^11.0.1",
+    "puppeteer-core": "^24.9.0",
+    "queue": "^7.0.0"
+  }
+}
