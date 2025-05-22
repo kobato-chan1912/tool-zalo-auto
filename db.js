@@ -50,11 +50,51 @@ async function addCrawlMessage(data) {
 }
 
 
+async function callReturnStatusSendMessage(id, status, errorMessage = null) {
+  await poolConnect;
+  const request = pool.request()
+    .input('id', sql.Int, id)
+    .input('status', sql.NVarChar, status)
+    .input('error_message', sql.NVarChar(sql.MAX), errorMessage);
+
+  await request.query(`
+    EXEC ReturnStatusSendMessage 
+      @id = @id, 
+      @status = @status, 
+      @error_message = @error_message
+  `);
+}
+
+
+async function callReplyZaloMessages(data) {
+  await poolConnect;
+  const request = pool.request()
+    .input('message_id', sql.BigInt, data.message_id)
+    .input('sendFrom', sql.VarChar(255), data.sendFrom || '')
+    .input('zalo_receiver', sql.VarChar(255), data.zalo_receiver || '')
+    .input('text', sql.Text, data.text || '')
+    .input('image', sql.Text, data.image || '')
+    .input('file', sql.Text, data.file || '');
+
+  await request.query(`
+    EXEC Replyzalo_messages 
+      @message_id = @message_id,
+      @sendFrom = @sendFrom,
+      @zalo_receiver = @zalo_receiver,
+      @text = @text,
+      @image = @image,
+      @file = @file
+  `);
+}
+
+
 module.exports = {
   sql,
   pool,
   poolConnect,
   getPendingMessages,
   updateMessageStatus,
-  addCrawlMessage
+  addCrawlMessage,
+  callReturnStatusSendMessage,
+  callReplyZaloMessages
 };

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getPendingMessages, updateMessageStatus } = require('./db');
+const { callReplyZaloMessages } = require('./db');
 const { sendMessageViaZalo } = require('./sender');
 const { addToQueue } = require('./queue');
 const { getBrowser } = require('./browserManager');
@@ -119,6 +119,9 @@ async function crawlUnreadMessages(profile) {
                     image: imagePath,
                     file: filePath
                 });
+
+
+                await callReplyZaloMessages(data)
 
                 
 

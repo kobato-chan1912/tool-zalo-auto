@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getPendingMessages, updateMessageStatus } = require('./db');
+const { getPendingMessages, updateMessageStatus, callReturnStatusSendMessage } = require('./db');
 const { sendMessageViaZalo } = require('./sender');
 const { addToQueue } = require('./queue');
 const { getBrowser } = require('./browserManager');
@@ -23,9 +23,9 @@ async function checkQueue() {
 
         await sendMessageViaZalo(browser, msg);
 
-        await updateMessageStatus(msg.id, 'done');
+        await callReturnStatusSendMessage(msg.id, 'done');
       } catch (err) {
-        await updateMessageStatus(msg.id, 'error', err.message);
+        await callReturnStatusSendMessage(msg.id, 'done', err.message);
       } finally {
         // ✅ luôn luôn gọi sau cùng — kể cả lỗi hay không lỗi
         if (browser) {
@@ -41,6 +41,8 @@ async function checkQueue() {
 
   }
 }
+
+
 
 setInterval(async () => {
   const profiles = await getProfiles();
