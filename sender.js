@@ -55,16 +55,18 @@ async function sendMessageViaZalo(browser, message) {
 
   try {
     await page.type("#contact-search-input", message.zalo_receiver, { delay: 100 });
-    await sleep(Math.random() * 2000 + 3000);
-    await page.click('div-b14[data-translate-inner=STR_CHAT_SEARCH]');
-    await sleep(3000);
+    await sleep(5000);
+
 
     const groupItemSelector = '[id^="group-item-"]';
     const contact = await page.$(groupItemSelector);
-    if (!contact) throw new Error('Không tìm thấy GROUP!');
 
-    await contact.click();
-    await page.waitForSelector("#richInput")
+    const userItemSelector = '[id^="friend-item-"]';
+    const friend = await page.$(userItemSelector);
+
+    if (!contact && !friend) throw new Error('Không tìm thấy Info!');
+
+    await keyboard.press("ENTER")
     await sleep(5000)
 
     if (message.attachment_path) {
