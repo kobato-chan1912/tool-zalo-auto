@@ -72,9 +72,10 @@ async function callReplyZaloMessages(data) {
     .input('message_id', sql.BigInt, data.message_id)
     .input('sendFrom', sql.VarChar(255), data.sendFrom || '')
     .input('zalo_receiver', sql.VarChar(255), data.zalo_receiver || '')
-    .input('text', sql.Text, data.text || '')
-    .input('image', sql.Text, data.image || '')
-    .input('file', sql.Text, data.file || '');
+    .input('text', sql.NVarChar(sql.MAX), data.text || '')
+    .input('image', sql.NVarChar(sql.MAX), data.image || '')
+    .input('file', sql.NVarChar(sql.MAX), data.file || '');
+
 
   await request.query(`
     EXEC Replyzalo_messages 

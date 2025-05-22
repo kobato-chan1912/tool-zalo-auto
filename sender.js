@@ -37,8 +37,21 @@ async function dropFileToInput(page, filePath, dropSelector = '#richInput') {
 
 async function sendMessageViaZalo(browser, message) {
   const page = await browser.newPage();
-  await page.goto('https://chat.zalo.me/', { waitUntil: 'networkidle2' });
   await page.setDefaultTimeout(60000);
+  await page.goto('https://chat.zalo.me/', { waitUntil: 'networkidle2' });
+  await sleep(5000)
+  const hasPopup = await page.evaluate(() => {
+    return !!document.querySelector('.zl-modal__dialog');
+  });
+
+  if (hasPopup) {
+    console.log("⚠️ Detected popup, reloading page...");
+    await sleep(1000); // đợi nhẹ để popup hiện rõ
+    await page.goto('https://chat.zalo.me/', { waitUntil: 'networkidle2' });
+  }
+  await page.waitForSelector('#contact-search')
+  await sleep(4000)
+
 
   try {
     await page.type("#contact-search-input", message.zalo_receiver, { delay: 100 });

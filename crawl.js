@@ -19,13 +19,25 @@ async function getProfiles() {
 
 async function crawlUnreadMessages(profile) {
 
-    console.log(profile)
+    console.log("-- Task: Crawl message for Profile " + profile.name)
 
 
     try {
         const browser = await getBrowser(profile.id);
         const page = await browser.newPage();
-        await page.goto("https://chat.zalo.me");
+        page.setDefaultTimeout(60000);
+        await page.goto('https://chat.zalo.me/', { waitUntil: 'networkidle2' });
+
+        await sleep(5000)
+        const hasPopup = await page.evaluate(() => {
+            return !!document.querySelector('.zl-modal__dialog');
+        });
+
+        if (hasPopup) {
+            console.log("⚠️ Detected popup, reloading page...");
+            await sleep(1000); // đợi nhẹ để popup hiện rõ
+            await page.goto('https://chat.zalo.me/', { waitUntil: 'networkidle2' });
+        }
 
         // 1. Tìm các hội thoại có tin chưa đọc
         await page.waitForSelector('#contact-search')
@@ -54,7 +66,7 @@ async function crawlUnreadMessages(profile) {
 
 
 
-        
+
 
             // 2. Click vào hội thoại
             await conv.click();
@@ -83,7 +95,6 @@ async function crawlUnreadMessages(profile) {
                             .reduce((data, byte) => data + String.fromCharCode(byte), "")
                     );
                 }).catch(error => {
-                    console.error("Error fetching image inside browser context:", error);
                     return null;
                 });
 
@@ -96,8 +107,6 @@ async function crawlUnreadMessages(profile) {
                     imagePath = path.resolve(downloadFolder, `image_${Date.now()}.jpg`);
                     const buffer = Buffer.from(base64Image, "base64");
                     fs.writeFileSync(imagePath, buffer);
-                } else {
-                    console.error("Failed to get image data.");
                 }
 
 
@@ -107,6 +116,7 @@ async function crawlUnreadMessages(profile) {
                 if (fileName) {
                     filePath = path.resolve("downloads", fileName);
                     await page.click(`${msgSelector} .download`);
+                    await sleep(50000)
                     // Optionally wait or move file after downloaded
                 }
 
@@ -123,7 +133,7 @@ async function crawlUnreadMessages(profile) {
 
                 await callReplyZaloMessages(data)
 
-                
+
 
             }
 
@@ -131,9 +141,13 @@ async function crawlUnreadMessages(profile) {
         }
 
         await page.close();
+
     } catch (error) {
         console.error(`❌ Error crawling profile ${profile.name}:`, error.message);
 
+    } finally {
+        await axios.get(`http://127.0.0.1:19995/api/v3/profiles/close/${profile.id}`);
+        await sleep(5000)
     }
 
 

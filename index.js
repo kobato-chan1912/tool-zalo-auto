@@ -17,7 +17,7 @@ async function checkQueue() {
     addToQueue(async () => {
       let browser;
       try {
-        console.log("- New Task - Send to " + msg.zalo_receiver);
+        console.log("-- Task - Send to " + msg.zalo_receiver);
         browser = await getBrowser(msg.gpm_id);
 
 
@@ -25,7 +25,7 @@ async function checkQueue() {
 
         await callReturnStatusSendMessage(msg.id, 'done');
       } catch (err) {
-        await callReturnStatusSendMessage(msg.id, 'done', err.message);
+        await callReturnStatusSendMessage(msg.id, 'error', err.message);
       } finally {
         // ✅ luôn luôn gọi sau cùng — kể cả lỗi hay không lỗi
         if (browser) {
@@ -49,7 +49,7 @@ setInterval(async () => {
   for (const profile of profiles) {
     addToQueue(() => crawlUnreadMessages(profile));
   }
-}, 5 * 60 * 1000);
+}, 1 * 60 * 1000);
 
 (async () => {
   setInterval(() => {
