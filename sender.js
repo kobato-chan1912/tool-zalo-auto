@@ -66,7 +66,7 @@ async function sendMessageViaZalo(browser, message) {
 
     if (!contact && !friend) throw new Error('Không tìm thấy Info!');
 
-    await keyboard.press("ENTER")
+    await page.keyboard.press('Enter');
     await sleep(5000)
 
     if (message.attachment_path) {

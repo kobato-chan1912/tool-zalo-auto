@@ -1,7 +1,19 @@
-const sql = require('mssql');
-require('dotenv').config();
 
-const pool = new sql.ConnectionPool(process.env.CONNECTION_STRING);
+require('dotenv').config();
+let sql, pool;
+
+if (process.env.APP === 'dev') {
+  sql = require('mssql/msnodesqlv8');
+
+  pool = new sql.ConnectionPool({
+    connectionString: process.env.CONNECTION_STRING
+  });
+
+} else {
+  sql = require('mssql');
+
+  pool = new sql.ConnectionPool(process.env.CONNECTION_STRING);
+}
 
 
 const poolConnect = pool.connect()
