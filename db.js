@@ -1,9 +1,8 @@
-const sql = require('mssql/msnodesqlv8');
+const sql = require('mssql');
 require('dotenv').config();
 
-const pool = new sql.ConnectionPool({
-  connectionString: process.env.CONNECTION_STRING
-});
+const pool = new sql.ConnectionPool(process.env.CONNECTION_STRING);
+
 
 const poolConnect = pool.connect()
   .then(() => console.log('✅ Connected to SQL Server'))
