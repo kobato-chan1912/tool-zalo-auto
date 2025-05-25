@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 const axios = require('axios')
@@ -16,14 +16,27 @@ async function clearInput(page, selector) {
 
 
 function isValidVietnamPhoneNumber(phone) {
-  // Xoá khoảng trắng và ký tự không phải số
-  phone = phone.replace(/[^0-9]/g, '');
+  // Xoá khoảng trắng và ký tự không phải số hoặc dấu cộng (giữ lại dấu + nếu có ở đầu)
+  phone = phone.trim().replace(/^(\+)?|[^0-9]/g, (match, plus) => plus || '');
 
-  // Kiểm tra theo các đầu số di động phổ biến tại Việt Nam
+  // Thêm lại dấu + nếu ban đầu có
+  if (phone.startsWith('84') && phone.length === 11) {
+    phone = '+84' + phone.slice(2);
+  } else if (phone.startsWith('0') && phone.length === 10) {
+    phone = phone;
+  } else if (phone.startsWith('84') && phone.length === 10) {
+    // 84 + 8 chữ số -> thiếu 1 chữ số
+    return false;
+  } else if (!phone.startsWith('+84') && !phone.startsWith('0')) {
+    return false;
+  }
+
+  // Kiểm tra theo đầu số hợp lệ
   const regex = /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/;
 
   return regex.test(phone);
 }
+
 
 
 async function dropFileToInput(page, filePath, dropSelector = '#richInput') {
