@@ -89,7 +89,7 @@ async function sendMessageViaZalo(browser, message) {
 
 
   try {
-    await page.type("#contact-search-input", message.zalo_receiver, { delay: 100 });
+    await page.type("#contact-search-input", message.zalo_receiver);
     await sleep(5000);
 
 
@@ -116,14 +116,14 @@ async function sendMessageViaZalo(browser, message) {
 
       await sleep(3000)
       await clearInput(page, ".zl-input")
-      await page.type(".zl-input", message.zalo_receiver, { delay: 100 })
+      await page.type(".zl-input", message.zalo_receiver)
       await sleep(3000)
       await page.keyboard.press('Enter');
       await sleep(3000)
     }
 
 
-    await page.type('#richInput', message.content || '', { delay: 100 });
+    await page.type('#richInput', message.content || '');
     await page.keyboard.press('Enter');
     await sleep(3000)
 
