@@ -81,8 +81,8 @@ async function callReplyZaloMessages(data) {
   await poolConnect;
   const request = pool.request()
     .input('message_id', sql.BigInt, data.message_id)
-    .input('sendFrom', sql.VarChar(255), data.sendFrom || '')
-    .input('zalo_receiver', sql.VarChar(255), data.zalo_receiver || '')
+    .input('sendFrom', sql.NVarChar(255), data.sendFrom || '')
+    .input('zalo_receiver', sql.NVarChar(255), data.zalo_receiver || '')
     .input('text', sql.NVarChar(sql.MAX), data.text || '')
     .input('image', sql.NVarChar(sql.MAX), data.image || '')
     .input('file', sql.NVarChar(sql.MAX), data.file || '');
