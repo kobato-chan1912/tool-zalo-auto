@@ -89,7 +89,7 @@ async function sendMessageViaZalo(browser, message) {
 
 
   try {
-    await page.type("#contact-search-input", message.zalo_receiver);
+    await page.type("#contact-search-input", message.zalo_receiver, {delay: 10});
     await sleep(5000);
 
 
@@ -116,16 +116,14 @@ async function sendMessageViaZalo(browser, message) {
 
       await sleep(3000)
       await clearInput(page, ".zl-input")
-      await page.type(".zl-input", message.zalo_receiver)
+      await page.type(".zl-input", message.zalo_receiver, {delay: 50})
       await sleep(3000)
       await page.keyboard.press('Enter');
       await sleep(3000)
     }
 
 
-    await page.type('#richInput', message.content || '');
-    await page.keyboard.press('Enter');
-    await sleep(3000)
+
 
 
     if (message.attachment_path) {
@@ -135,7 +133,9 @@ async function sendMessageViaZalo(browser, message) {
     }
 
 
-
+    await page.type('#richInput', message.content || '', {delay: 10});
+    await page.keyboard.press('Enter');
+    await sleep(3000)
 
     // lay tin nhan dap lai 
     const msgIds = await page.$$eval('[id^="bb_msg_id_"]', (els, unreadCount) =>
