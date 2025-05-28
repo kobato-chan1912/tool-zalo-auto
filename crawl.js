@@ -144,7 +144,10 @@ async function crawlUnreadMessages(profile) {
         await page.close();
 
     } catch (error) {
-        console.error(`❌ Error crawling profile ${profile.name}:`, error.message);
+        if (!error.message.includes("BigInt")) {
+            console.error(`❌ Error crawling profile ${profile.name}:`, error.message);
+        }
+
 
     } finally {
         await axios.get(`http://127.0.0.1:19995/api/v3/profiles/close/${profile.id}`);
