@@ -3,7 +3,7 @@ const path = require('path');
 const sleep = ms => new Promise(res => setTimeout(res, ms));
 const axios = require('axios')
 const mime = require('mime-types');
-
+const { createZaloAlias, findUsernameByPhone } = require('./db');
 
 async function clearInput(page, selector) {
   await page.focus(selector);
@@ -89,7 +89,7 @@ async function sendMessageViaZalo(browser, message) {
 
 
   try {
-    await page.type("#contact-search-input", message.zalo_receiver, {delay: 10});
+    await page.type("#contact-search-input", message.zalo_receiver, { delay: 10 });
     await sleep(5000);
 
 
@@ -107,8 +107,8 @@ async function sendMessageViaZalo(browser, message) {
     // kiem tra message.zalo_receiver co phai la so dien thoai hay khong
     // neu la so dien thoai thi check tiep cai nguoi nhan, neu nguoi nhan ko phai sdt thi bum
 
-    const sendFrom = await page.$eval(`div-b18`, el => el.textContent).catch(() => null);
-    if (isValidVietnamPhoneNumber(message.zalo_receiver) && (!isValidVietnamPhoneNumber(sendFrom))) {
+    const sendToUsername = await page.$eval(`div-b18`, el => el.textContent).catch(() => null);
+    if (isValidVietnamPhoneNumber(message.zalo_receiver) && (!isValidVietnamPhoneNumber(sendToUsername))) {
       await page.evaluate(() => {
         const el = document.querySelector('.edit-icon');
         if (el) el.click();
@@ -116,9 +116,12 @@ async function sendMessageViaZalo(browser, message) {
 
       await sleep(3000)
       await clearInput(page, ".zl-input")
-      await page.type(".zl-input", message.zalo_receiver, {delay: 50})
+      await page.type(".zl-input", message.zalo_receiver, { delay: 50 })
       await sleep(3000)
       await page.keyboard.press('Enter');
+
+      // create alias
+      await createZaloAlias(message.zalo_receiver, sendToUsername)
       await sleep(3000)
     }
 
@@ -133,7 +136,18 @@ async function sendMessageViaZalo(browser, message) {
     }
 
 
-    await page.type('#richInput', message.content || '', {delay: 10});
+    await page.evaluate((text) => {
+      navigator.clipboard.writeText(text);
+    }, message.content);
+
+    await page.focus('#richInput');
+    await sleep(2000)
+    await page.keyboard.down('Control');
+    await page.keyboard.press('KeyV');
+    await page.keyboard.up('Control');
+
+
+    // await page.type('#richInput', message.content || '', {delay: 10});
     await page.keyboard.press('Enter');
     await sleep(3000)
 

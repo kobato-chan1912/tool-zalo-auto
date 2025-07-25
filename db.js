@@ -23,12 +23,49 @@ const poolConnect = pool.connect()
     process.exit(1);
   });
 
+
+async function createZaloAlias(phone, username) {
+  await poolConnect;
+  const result = await pool.request()
+    .input('phone', phone)
+    .input('username', username)
+    .query(`
+      INSERT INTO ZaloAlias (phone, username)
+      VALUES (@phone, @username);
+    `);
+  return result.rowsAffected[0] > 0; // true nếu insert thành công
+}
+
+async function findUsernameByPhone(phone) {
+  await poolConnect;
+  const result = await pool.request()
+    .input('phone', phone)
+    .query(`
+      SELECT username
+      FROM ZaloAlias
+      WHERE phone = @phone
+    `);
+  
+  if (result.recordset.length > 0) {
+    return result.recordset[0].username; // Có thể là null nếu username null
+  } else {
+    return null; // Không tìm thấy
+  }
+}
+
+
 async function getPendingMessages() {
   await poolConnect;
   const result = await pool.request()
-    .query("SELECT * FROM SendMessage WHERE status = '0'");
+    .query(`
+      SELECT * 
+      FROM SendMessage 
+      WHERE status = '0' 
+        AND (timeSend IS NULL OR timeSend <= GETDATE())
+    `);
   return result.recordset;
 }
+
 
 async function updateMessageStatus(id, status, errorMessage = null) {
   await poolConnect;
@@ -108,5 +145,7 @@ module.exports = {
   updateMessageStatus,
   addCrawlMessage,
   callReturnStatusSendMessage,
-  callReplyZaloMessages
+  callReplyZaloMessages,
+  createZaloAlias,
+  findUsernameByPhone
 };

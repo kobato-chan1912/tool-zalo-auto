@@ -6,6 +6,7 @@ CREATE TABLE SendMessage (
     content NVARCHAR(MAX),
     attachment_path NVARCHAR(1000), -- Đường dẫn file ảnh/zip/... nếu có
     error_message NVARCHAR(MAX), -- Ghi chú lỗi nếu có
+    timeSend datetime null
 );
 
 
@@ -13,11 +14,19 @@ CREATE TABLE zalo_messages (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     message_id BIGINT NOT NULL,
     sendFrom VARCHAR(255) NOT NULL,
+    sender NVARCHAR(255) NULL,
     zalo_receiver VARCHAR(255) NOT NULL,
     text NVARCHAR(MAX) NULL,
     image NVARCHAR(MAX) NULL,
     [file] NVARCHAR(MAX) NULL
 );
+
+CREATE TABLE ZaloAlias (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    phone VARCHAR(20) NULL,
+    username NVARCHAR(255) NULL
+);
+
 
 CREATE PROCEDURE [dbo].[ReturnStatusSendMessage]
     @id INT, -- Bắt buộc
@@ -34,16 +43,18 @@ END
 
 CREATE PROCEDURE [dbo].[Replyzalo_messages]
     @message_id BIGINT,
+    @sender VARCHAR(255),
     @sendFrom VARCHAR(255),
     @zalo_receiver VARCHAR(255),
-    @text TEXT,
-    @image TEXT,
-    @file TEXT
+    @text NVARCHAR(MAX),
+    @image NVARCHAR(MAX),
+    @file NVARCHAR(MAX)
 AS
 BEGIN
     SET NOCOUNT ON;
     INSERT INTO zalo_messages(
 	[message_id],
+    [sender],
 	[sendFrom], 
 	[zalo_receiver], 
 	[text],
@@ -51,6 +62,7 @@ BEGIN
     [file])
 	VALUES(
 	@message_id,
+    @sender,
 	@sendFrom, 
 	@zalo_receiver, 
 	@text,

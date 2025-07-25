@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { callReplyZaloMessages } = require('./db');
+const { callReplyZaloMessages, findUsernameByPhone } = require('./db');
 const { sendMessageViaZalo } = require('./sender');
 const { addToQueue } = require('./queue');
 const { getBrowser } = require('./browserManager');
@@ -122,8 +122,10 @@ async function crawlUnreadMessages(profile) {
                 }
 
                 // Lưu DB
+                const sender = await findUsernameByPhone(sendFrom)
                 const data = ({
                     message_id: msgId,
+                    sender: sender,
                     sendFrom: sendFrom, // xác định cách lấy nếu được
                     zalo_receiver: profile.name,
                     text,
