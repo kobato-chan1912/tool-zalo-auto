@@ -43,16 +43,19 @@ async function checkQueue() {
 }
 
 
+checkQueue();
 
-setInterval(async () => {
-  const profiles = await getProfiles();
-  for (const profile of profiles) {
-    addToQueue(() => crawlUnreadMessages(profile));
-  }
-}, 5 * 60 * 1000);
 
-(async () => {
-  setInterval(() => {
-    checkQueue().catch(console.error);
-  }, 5000);
-})();
+
+// setInterval(async () => {
+//   const profiles = await getProfiles();
+//   for (const profile of profiles) {
+//     addToQueue(() => crawlUnreadMessages(profile));
+//   }
+// }, 5 * 60 * 1000);
+
+// (async () => {
+//   setInterval(() => {
+//     checkQueue().catch(console.error);
+//   }, 5000);
+// })();

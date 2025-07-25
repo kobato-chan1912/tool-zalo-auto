@@ -12,7 +12,8 @@ async function getBrowser(gpm_id) {
   await new Promise(resolve => setTimeout(resolve, 5000));
   const browser = await puppeteer.connect({
     browserURL: `http://${remote_debugging_address}`,
-    defaultViewport: null
+    defaultViewport: null,
+    headless: 'new',
   });
 
   return browser;

@@ -148,6 +148,7 @@ async function sendMessageViaZalo(browser, message) {
 
 
     // await page.type('#richInput', message.content || '', {delay: 10});
+    await sleep(3000)
     await page.keyboard.press('Enter');
     await sleep(3000)
 
