@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 let sql, pool;
 
@@ -24,47 +23,7 @@ const poolConnect = pool.connect()
   });
 
 
-async function createZaloAlias(phone, username) {
-  await poolConnect;
-  const result = await pool.request()
-    .input('phone', phone)
-    .input('username', username)
-    .query(`
-      INSERT INTO ZaloAlias (phone, username)
-      VALUES (@phone, @username);
-    `);
-  return result.rowsAffected[0] > 0; // true nếu insert thành công
-}
 
-async function findUsernameByPhone(phone) {
-  await poolConnect;
-  const result = await pool.request()
-    .input('phone', phone)
-    .query(`
-      SELECT username
-      FROM ZaloAlias
-      WHERE phone = @phone
-    `);
-  
-  if (result.recordset.length > 0) {
-    return result.recordset[0].username; // Có thể là null nếu username null
-  } else {
-    return null; // Không tìm thấy
-  }
-}
-
-
-async function getPendingMessages() {
-  await poolConnect;
-  const result = await pool.request()
-    .query(`
-      SELECT * 
-      FROM SendMessage 
-      WHERE status = '0' 
-        AND (timeSend IS NULL OR timeSend <= GETDATE())
-    `);
-  return result.recordset;
-}
 
 
 async function updateMessageStatus(id, status, errorMessage = null) {
@@ -118,6 +77,7 @@ async function callReplyZaloMessages(data) {
   await poolConnect;
   const request = pool.request()
     .input('message_id', sql.BigInt, data.message_id)
+    .input('sender', sql.NVarChar(255), data.sender || '')
     .input('sendFrom', sql.NVarChar(255), data.sendFrom || '')
     .input('zalo_receiver', sql.NVarChar(255), data.zalo_receiver || '')
     .input('text', sql.NVarChar(sql.MAX), data.text || '')
@@ -128,6 +88,7 @@ async function callReplyZaloMessages(data) {
   await request.query(`
     EXEC Replyzalo_messages 
       @message_id = @message_id,
+      @sender = @sender,
       @sendFrom = @sendFrom,
       @zalo_receiver = @zalo_receiver,
       @text = @text,
@@ -136,16 +97,52 @@ async function callReplyZaloMessages(data) {
   `);
 }
 
+async function findAliasByPhone(phone) {
+  await poolConnect;
+  const result = await pool.request()
+    .input('phone', sql.VarChar, phone)
+    .query('SELECT * FROM ZaloAlias WHERE phone = @phone');
+  return result.recordset[0];
+}
+
+async function insertAlias(phone, uid, username) {
+  await poolConnect;
+  return await pool.request()
+    .input('phone', sql.VarChar, phone)
+    .input('uid', sql.VarChar, uid)
+    .input('username', sql.NVarChar, username)
+    .query(`
+      INSERT INTO ZaloAlias (phone, uid, username)
+      VALUES (@phone, @uid, @username)
+    `);
+}
+
+async function getPendingMessagesForIMEI(imei) {
+  await poolConnect;
+  const result = await pool.request()
+    .input('imei', sql.VarChar, imei)
+    .query(`
+      SELECT * 
+      FROM SendMessage 
+      WHERE status = '0' 
+        AND (timeSend IS NULL OR timeSend <= GETDATE())
+        AND (imei = @imei)
+    `);
+  return result.recordset;
+}
+
 
 module.exports = {
   sql,
   pool,
   poolConnect,
-  getPendingMessages,
   updateMessageStatus,
   addCrawlMessage,
   callReturnStatusSendMessage,
   callReplyZaloMessages,
-  createZaloAlias,
-  findUsernameByPhone
+  findAliasByPhone,
+  insertAlias,
+  getPendingMessagesForIMEI
+
+
 };

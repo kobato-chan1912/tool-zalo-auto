@@ -8,6 +8,7 @@
     "msnodesqlv8": "^4.5.0",
     "mssql": "^11.0.1",
     "puppeteer-core": "^24.9.0",
-    "queue": "^7.0.0"
+    "queue": "^7.0.0",
+    "zca-js": "^2.0.0-beta.25"
   }
 }

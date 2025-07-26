@@ -5,7 +5,6 @@ import axios from "axios";
 import dotenv from 'dotenv';
 dotenv.config();
 import { callReplyZaloMessages } from './db.js';
-import { processPendingMessages } from './sendMessages.js';
 
 
 
@@ -33,14 +32,14 @@ for (const file of accountFiles) {
 
 
     // Lưu lại instance nếu cần dùng sau
-    zaloInstances.push({ zalo, api, accountData });
+    zaloInstances.push({ zalo, api });
 
     console.log(`✅ Đã đăng nhập ${file}`);
 
     api.listener.on("message", async (msg) => {
         try {
 
-            // console.log(msg)
+            console.log(msg)
             let type = msg.constructor.name;
             const msgData = msg.data;
             let msgId = msgData.msgId;
@@ -133,9 +132,6 @@ for (const file of accountFiles) {
     });
 
 
-    setInterval(() => {
-        processPendingMessages(zaloInstances);
-    }, 10 * 1000); // mỗi 1 phút
 
 
 

@@ -1,12 +1,13 @@
 CREATE TABLE SendMessage (
     id INT IDENTITY(1,1) PRIMARY KEY,
-    gpm_id VARCHAR(50) NOT NULL,
+    imei VARCHAR(255) NOT NULL,
     status NVARCHAR(10) DEFAULT '0', -- 0 | sending | done | error
     zalo_receiver NVARCHAR(255) NOT NULL,
     content NVARCHAR(MAX),
     attachment_path NVARCHAR(1000), -- Đường dẫn file ảnh/zip/... nếu có
     error_message NVARCHAR(MAX), -- Ghi chú lỗi nếu có
-    timeSend datetime null
+    send_type NVARCHAR(20) NOT NULL DEFAULT 'user',
+    timeSend datetime null,
 );
 
 
@@ -24,6 +25,7 @@ CREATE TABLE zalo_messages (
 CREATE TABLE ZaloAlias (
     id INT IDENTITY(1,1) PRIMARY KEY,
     phone VARCHAR(20) NULL,
+    uid NVARCHAR(255) NULL,
     username NVARCHAR(255) NULL
 );
 
