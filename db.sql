@@ -28,7 +28,7 @@ CREATE TABLE ZaloAlias (
     id INT IDENTITY(1,1) PRIMARY KEY,
     phone VARCHAR(20) NULL,
     uid NVARCHAR(255) NULL,
-    username NVARCHAR(255) NULL
+    zaloName NVARCHAR(255) NULL
 );
 
 

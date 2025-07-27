@@ -2,6 +2,12 @@ import { getPendingMessagesForIMEI, findAliasByPhone, findAliasByUid, insertAlia
 import path from 'path';
 import { ThreadType } from 'zca-js';
 
+
+const isNaturalNumber = (str) => {
+    const num = Number(str);
+    return Number.isInteger(num) && num >= 0;
+};
+
 export async function processPendingMessages(instances) {
 
 
@@ -28,8 +34,8 @@ export async function processPendingMessages(instances) {
                         const result = await api.findUser(zalo_receiver);
                         if (!result || !result.uid) throw new Error('Không tìm thấy người dùng');
 
-                        await insertAlias(zalo_receiver, result.uid, result.zaloName);
-                        alias = { phone: zalo_receiver, uid: result.uid, zaloName: result.zaloName };
+                        await insertAlias(zalo_receiver, result.uid, result.zalo_name);
+                        alias = { phone: zalo_receiver, uid: result.uid, zaloName: result.zalo_name };
                     }
 
                     globalSendID = alias.uid;
@@ -59,23 +65,36 @@ export async function processPendingMessages(instances) {
 
                 // ==== Group ====
                 else if (send_type === 'group') {
-                    const allGroups = await api.getAllGroups();
-                    const groupIds = Object.keys(allGroups.gridVerMap);
-
                     let groupUid = null;
 
-                    for (const gid of groupIds) {
-                        const groupInfo = await api.getGroupInfo(gid);
-                        const group = groupInfo.gridInfoMap?.[gid];
-                        if (group?.name === zalo_receiver) {
-                            groupUid = gid;
-                            globalSendID = gid;
-                            globalSendName = group.name;
-                            break;
-                        }
-                    }
+                    const isNumberReceiver = isNaturalNumber(zalo_receiver);
+                    if (!isNumberReceiver) {
+                        const allGroups = await api.getAllGroups();
+                        const groupIds = Object.keys(allGroups.gridVerMap);
 
-                    if (!groupUid) throw new Error('Không tìm thấy group phù hợp');
+                        for (const gid of groupIds) {
+                            const groupInfo = await api.getGroupInfo(gid);
+                            const group = groupInfo.gridInfoMap?.[gid];
+                            if (group?.name === zalo_receiver) {
+                                groupUid = gid;
+                                globalSendID = gid;
+                                globalSendName = group.name;
+                                break;
+                            }
+                        }
+
+                        let findAliasGroup = await findAliasByUid(globalSendID);
+                        if (!findAliasGroup) {
+                            await insertAlias(null, globalSendID, globalSendName);
+                            findAliasGroup = { phone: null, uid: globalSendID, zaloName: globalSendName };
+                        }
+                        if (!groupUid) throw new Error('Không tìm thấy group phù hợp');
+                    } else {
+                        let findAliasGroup = await findAliasByUid(zalo_receiver);
+                        groupUid = zalo_receiver;
+                        globalSendID = zalo_receiver;
+                        globalSendName = findAliasGroup.zaloName || null;
+                    }
 
                     if (content) {
                         await api.sendMessage(content, groupUid, ThreadType.Group);
@@ -99,7 +118,7 @@ export async function processPendingMessages(instances) {
                 let imagePath = null;
                 let filePath = null;
                 if (attachment_path) {
-                    if (attachment_path.endsWith('.jpg') || attachment_path.endsWith('.png') 
+                    if (attachment_path.endsWith('.jpg') || attachment_path.endsWith('.png')
                         || attachment_path.endsWith('.jpeg') || attachment_path.endsWith('.gif')) {
                         imagePath = path.resolve(attachment_path);
                     } else {
@@ -108,11 +127,11 @@ export async function processPendingMessages(instances) {
                 }
 
                 let myInfo = await api.fetchAccountInfo()
-                
+
 
                 const replyData = ({
                     message_id: "self-sent",
-                    sendTo: globalSendName, 
+                    sendTo: globalSendName,
                     sendTo_id: globalSendID,
                     sender: accountData.name,
                     sender_id: myInfo.userId,
