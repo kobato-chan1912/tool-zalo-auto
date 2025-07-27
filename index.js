@@ -19,7 +19,7 @@ for (const file of accountFiles) {
     const accountData = JSON.parse(fs.readFileSync(path.join(accountsDir, file), "utf-8"));
 
     const zalo = new Zalo({
-        selfListen: true,
+        selfListen: false,
         checkUpdate: false, // nên tắt khi chạy nhiều instance
         logging: true
     });
