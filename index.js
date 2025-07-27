@@ -44,18 +44,27 @@ for (const file of accountFiles) {
             let type = msg.constructor.name;
             const msgData = msg.data;
             let msgId = msgData.msgId;
+
+            let sender_id = msgData.uidFrom;
             let sender = msgData.dName;
+
+
+            // send to là mình hoặc nhóm 
+            let sendTo = null;
+            let sendTo_id = null;
+
             let content = msgData.content;
-            let sendFrom = null;
             if (type === "UserMessage") {
-                sendFrom = msgData.dName;
+                sendTo = accountData.name;
+                sendTo_id = msgData.idTo;
             }
 
             if (type === "GroupMessage") {
                 // get info 
                 let groupInfo = await api.getGroupInfo(msg.threadId);
                 const group = groupInfo.gridInfoMap?.[msg.threadId];
-                sendFrom = group.name;
+                sendTo = group.name;
+                sendTo_id = msg.threadId;
             }
 
 
@@ -114,7 +123,9 @@ for (const file of accountFiles) {
             const replyData = ({
                 message_id: msgId,
                 sender: sender,
-                sendFrom: sendFrom, // xác định cách lấy nếu được
+                sender_id: sender_id,
+                sendTo: sendTo, // xác định cách lấy nếu được
+                sendTo_id: sendTo_id,
                 zalo_receiver: accountData.name,
                 text: content,
                 image: imagePath,

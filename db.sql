@@ -14,8 +14,10 @@ CREATE TABLE SendMessage (
 CREATE TABLE zalo_messages (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     message_id BIGINT NOT NULL,
-    sendFrom VARCHAR(255) NOT NULL,
+    sendTo NVARCHAR(255) NOT NULL,
+    sendTo_id NVARCHAR(255) NOT NULL,
     sender NVARCHAR(255) NULL,
+    sender_id NVARCHAR(255) NULL,
     zalo_receiver VARCHAR(255) NOT NULL,
     text NVARCHAR(MAX) NULL,
     image NVARCHAR(MAX) NULL,
@@ -46,7 +48,7 @@ END
 CREATE PROCEDURE [dbo].[Replyzalo_messages]
     @message_id BIGINT,
     @sender VARCHAR(255),
-    @sendFrom VARCHAR(255),
+    @sendTo VARCHAR(255),
     @zalo_receiver VARCHAR(255),
     @text NVARCHAR(MAX),
     @image NVARCHAR(MAX),
@@ -57,7 +59,7 @@ BEGIN
     INSERT INTO zalo_messages(
 	[message_id],
     [sender],
-	[sendFrom], 
+	[sendTo], 
 	[zalo_receiver], 
 	[text],
     [image],
@@ -65,7 +67,7 @@ BEGIN
 	VALUES(
 	@message_id,
     @sender,
-	@sendFrom, 
+	@sendTo, 
 	@zalo_receiver, 
 	@text,
     @image,

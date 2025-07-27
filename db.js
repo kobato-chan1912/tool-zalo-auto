@@ -45,14 +45,14 @@ async function addCrawlMessage(data) {
   await poolConnect;
   await pool.request()
     .input('message_id', sql.NVarChar, data.message_id)
-    .input('sendFrom', sql.NVarChar, data.sendFrom)
+    .input('sendTo', sql.NVarChar, data.sendTo)
     .input('zalo_receiver', sql.NVarChar, data.zalo_receiver)
     .input('text', sql.NVarChar, data.text)
     .input('image', sql.NVarChar, data.image)
     .input('file', sql.NVarChar, data.file)
     .query(`
-      INSERT INTO zalo_messages (message_id, sendFrom, zalo_receiver, text, image, file)
-      VALUES (@message_id, @sendFrom, @zalo_receiver, @text, @image, @file)
+      INSERT INTO zalo_messages (message_id, sendTo, zalo_receiver, text, image, file)
+      VALUES (@message_id, @sendTo, @zalo_receiver, @text, @image, @file)
     `);
 }
 
@@ -78,7 +78,9 @@ async function callReplyZaloMessages(data) {
   const request = pool.request()
     .input('message_id', sql.BigInt, data.message_id)
     .input('sender', sql.NVarChar(255), data.sender || '')
-    .input('sendFrom', sql.NVarChar(255), data.sendFrom || '')
+    .input('sender_id', sql.NVarChar(255), data.sender || '')
+    .input('sendTo', sql.NVarChar(255), data.sendTo || '')
+    .input('sendTo_id', sql.NVarChar(255), data.sendTo_id || '')
     .input('zalo_receiver', sql.NVarChar(255), data.zalo_receiver || '')
     .input('text', sql.NVarChar(sql.MAX), data.text || '')
     .input('image', sql.NVarChar(sql.MAX), data.image || '')
@@ -89,7 +91,9 @@ async function callReplyZaloMessages(data) {
     EXEC Replyzalo_messages 
       @message_id = @message_id,
       @sender = @sender,
-      @sendFrom = @sendFrom,
+      @sender_id = @sender_id,
+      @sendTo = @sendTo,
+      @sendTo_id = @sendTo_id,
       @zalo_receiver = @zalo_receiver,
       @text = @text,
       @image = @image,
@@ -105,15 +109,25 @@ async function findAliasByPhone(phone) {
   return result.recordset[0];
 }
 
-async function insertAlias(phone, uid, username) {
+async function findAliasByUid(uid) {
+  await poolConnect;
+  const result = await pool.request()
+    .input('uid', sql.VarChar, uid)
+    .query('SELECT * FROM ZaloAlias WHERE uid = @uid');
+  return result.recordset[0];
+}
+
+
+
+async function insertAlias(phone, uid, zaloName) {
   await poolConnect;
   return await pool.request()
     .input('phone', sql.VarChar, phone)
     .input('uid', sql.VarChar, uid)
-    .input('username', sql.NVarChar, username)
+    .input('zaloName', sql.NVarChar, zaloName)
     .query(`
-      INSERT INTO ZaloAlias (phone, uid, username)
-      VALUES (@phone, @uid, @username)
+      INSERT INTO ZaloAlias (phone, uid, zaloName)
+      VALUES (@phone, @uid, @zaloName)
     `);
 }
 
@@ -141,6 +155,7 @@ module.exports = {
   callReturnStatusSendMessage,
   callReplyZaloMessages,
   findAliasByPhone,
+  findAliasByUid,
   insertAlias,
   getPendingMessagesForIMEI
 

@@ -1,9 +1,9 @@
-import { getPendingMessagesForIMEI, findAliasByPhone, insertAlias, callReturnStatusSendMessage } from './db.js';
+import { getPendingMessagesForIMEI, findAliasByPhone, findAliasByUid, insertAlias, callReturnStatusSendMessage, callReplyZaloMessages } from './db.js';
 import path from 'path';
 import { ThreadType } from 'zca-js';
 
 export async function processPendingMessages(instances) {
-    
+
 
     for (const instance of instances) {
         const { api, accountData } = instance;
@@ -16,10 +16,12 @@ export async function processPendingMessages(instances) {
             const api = instance.api;
 
             try {
+                let globalSendID = null;
+                let globalSendName = null;
                 if (send_type === 'user') {
                     // Tìm alias
                     let alias = await findAliasByPhone(zalo_receiver);
-                    
+
 
                     if (!alias) {
                         // Gọi Zalo API tìm user
@@ -27,17 +29,20 @@ export async function processPendingMessages(instances) {
                         if (!result || !result.uid) throw new Error('Không tìm thấy người dùng');
 
                         await insertAlias(zalo_receiver, result.uid, result.zaloName);
-                        alias = { phone: zalo_receiver, uid: result.uid };
-                    } 
+                        alias = { phone: zalo_receiver, uid: result.uid, zaloName: result.zaloName };
+                    }
 
-                    
+                    globalSendID = alias.uid;
+                    globalSendName = alias.zaloName;
+
+
 
                     // Gửi nội dung
 
-                   
+
                     if (content) {
                         await api.sendMessage(content, alias.uid, ThreadType.User);
-                       
+
                     }
 
                     // Gửi file
@@ -64,6 +69,8 @@ export async function processPendingMessages(instances) {
                         const group = groupInfo.gridInfoMap?.[gid];
                         if (group?.name === zalo_receiver) {
                             groupUid = gid;
+                            globalSendID = gid;
+                            globalSendName = group.name;
                             break;
                         }
                     }
@@ -89,6 +96,34 @@ export async function processPendingMessages(instances) {
                 // ✅ Cập nhật trạng thái đã gửi
                 await callReturnStatusSendMessage(msg.id, 'done');
                 console.log(`✅ Gửi tin nhắn ID ${id} thành công`);
+                let imagePath = null;
+                let filePath = null;
+                if (attachment_path) {
+                    if (attachment_path.endsWith('.jpg') || attachment_path.endsWith('.png') 
+                        || attachment_path.endsWith('.jpeg') || attachment_path.endsWith('.gif')) {
+                        imagePath = path.resolve(attachment_path);
+                    } else {
+                        filePath = path.resolve(attachment_path);
+                    }
+                }
+
+                let myInfo = await api.fetchAccountInfo()
+                
+
+                const replyData = ({
+                    message_id: "self-sent",
+                    sendTo: globalSendName, 
+                    sendTo_id: globalSendID,
+                    sender: accountData.name,
+                    sender_id: myInfo.userId,
+                    zalo_receiver: accountData.name,
+                    text: content,
+                    image: imagePath,
+                    file: filePath
+                });
+
+                await callReplyZaloMessages(replyData);
+                //
 
             } catch (err) {
                 console.log(err)
