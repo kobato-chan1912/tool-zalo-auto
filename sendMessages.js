@@ -83,17 +83,17 @@ export async function processPendingMessages(instances) {
                             }
                         }
 
-                        let findAliasGroup = await findAliasByUid(globalSendID);
-                        if (!findAliasGroup) {
-                            await insertAlias(null, globalSendID, globalSendName);
-                            findAliasGroup = { phone: null, uid: globalSendID, zaloName: globalSendName };
-                        }
+
                         if (!groupUid) throw new Error('Không tìm thấy group phù hợp');
+
                     } else {
-                        let findAliasGroup = await findAliasByUid(zalo_receiver);
                         groupUid = zalo_receiver;
                         globalSendID = zalo_receiver;
-                        globalSendName = findAliasGroup.zaloName || null;
+                        const groupInfo = await api.getGroupInfo(groupUid);
+                        const group = groupInfo.gridInfoMap?.[gid];
+                        globalSendName = group.name;
+
+                        if (!globalSendName) throw new Error('Không tìm thấy group phù hợp');
                     }
 
                     if (content) {
@@ -133,8 +133,8 @@ export async function processPendingMessages(instances) {
                     message_id: "self-sent",
                     sendTo: globalSendName,
                     sendTo_id: globalSendID,
-                    sender: accountData.name,
-                    sender_id: myInfo.userId,
+                    sender: myInfo.zalo_name,
+                    sender_id: myInfo.uid,
                     zalo_receiver: accountData.name,
                     text: content,
                     image: imagePath,
