@@ -90,7 +90,7 @@ export async function processPendingMessages(instances) {
                         groupUid = zalo_receiver;
                         globalSendID = zalo_receiver;
                         const groupInfo = await api.getGroupInfo(groupUid);
-                        const group = groupInfo.gridInfoMap?.[gid];
+                        const group = groupInfo.gridInfoMap?.[groupUid];
                         globalSendName = group.name;
 
                         if (!globalSendName) throw new Error('Không tìm thấy group phù hợp');
