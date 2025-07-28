@@ -30,6 +30,10 @@ for (const file of accountFiles) {
         userAgent: accountData.userAgent
     });
 
+    const myInfo = await api.fetchAccountInfo();
+    const myUserId = myInfo?.profile?.userId || null;
+    // add myUserId to accountData 
+    accountData.myUserId = myUserId;
 
 
     // Lưu lại instance nếu cần dùng sau
@@ -53,9 +57,14 @@ for (const file of accountFiles) {
             let sendTo = null;
             let sendTo_id = null;
 
+
+
+
             let content = msgData.content;
             if (type === "UserMessage") {
-                sendTo = accountData.name;
+                let myInfo = await api.fetchAccountInfo()
+                const myZaloName = myInfo?.profile?.zaloName || null;;
+                sendTo = myZaloName;
                 sendTo_id = msgData.idTo;
             }
 
@@ -126,7 +135,7 @@ for (const file of accountFiles) {
                 sender_id: sender_id,
                 sendTo: sendTo, // xác định cách lấy nếu được
                 sendTo_id: sendTo_id,
-                zalo_receiver: accountData.name,
+                zalo_receiver: accountData.myUserId,
                 text: content,
                 image: imagePath,
                 file: filePath

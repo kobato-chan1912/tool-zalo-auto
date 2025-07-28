@@ -26,21 +26,17 @@ export async function processPendingMessages(instances) {
                 let globalSendName = null;
                 if (send_type === 'user') {
                     // Tìm alias
-                    let alias = await findAliasByPhone(zalo_receiver);
 
 
-                    if (!alias) {
-                        // Gọi Zalo API tìm user
-                        const result = await api.findUser(zalo_receiver);
-                        if (!result || !result.uid) throw new Error('Không tìm thấy người dùng');
+                    const result = await api.findUser(zalo_receiver);
+                    if (!result || !result.uid) throw new Error('Không tìm thấy người dùng');
 
-                        await insertAlias(zalo_receiver, result.uid, result.zalo_name);
-                        alias = { phone: zalo_receiver, uid: result.uid, zaloname: result.zalo_name };
-                    }
+                    await insertAlias(zalo_receiver, result.uid, result.zalo_name);
+                    let alias = { phone: zalo_receiver, uid: result.uid, zaloname: result.zalo_name };
+
 
                     globalSendID = alias.uid;
                     globalSendName = alias.zaloname;
-
 
 
                     // Gửi nội dung
@@ -136,7 +132,7 @@ export async function processPendingMessages(instances) {
                     sendTo_id: globalSendID,
                     sender: myZaloName,
                     sender_id: myUserId,
-                    zalo_receiver: accountData.name,
+                    zalo_receiver: accountData.myUserId,
                     text: content,
                     image: imagePath,
                     file: filePath
