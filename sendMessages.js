@@ -39,7 +39,7 @@ export async function processPendingMessages(instances) {
                     }
 
                     globalSendID = alias.uid;
-                    globalSendName = alias.zaloName;
+                    globalSendName = alias.zaloname;
 
 
 
