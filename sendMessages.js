@@ -127,14 +127,15 @@ export async function processPendingMessages(instances) {
                 }
 
                 let myInfo = await api.fetchAccountInfo()
-
+                const myUserId = myInfo?.profile?.userId || null;
+                const myZaloName = myInfo?.profile?.zaloName || null;
 
                 const replyData = ({
                     message_id: "self-sent",
                     sendTo: globalSendName,
                     sendTo_id: globalSendID,
-                    sender: myInfo.zalo_name,
-                    sender_id: myInfo.uid,
+                    sender: myZaloName,
+                    sender_id: myUserId,
                     zalo_receiver: accountData.name,
                     text: content,
                     image: imagePath,
