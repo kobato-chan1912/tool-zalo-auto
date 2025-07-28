@@ -35,7 +35,7 @@ export async function processPendingMessages(instances) {
                         if (!result || !result.uid) throw new Error('Không tìm thấy người dùng');
 
                         await insertAlias(zalo_receiver, result.uid, result.zalo_name);
-                        alias = { phone: zalo_receiver, uid: result.uid, zaloName: result.zalo_name };
+                        alias = { phone: zalo_receiver, uid: result.uid, zaloname: result.zalo_name };
                     }
 
                     globalSendID = alias.uid;
