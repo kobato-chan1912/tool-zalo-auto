@@ -83,7 +83,7 @@ for (const file of accountFiles) {
             if (msgData["content"]?.["href"]) {
                 const fileUrl = msgData["content"]["href"];
                 const downloadDir = process.env.DOWNLOAD_PATH || "./downloads";
-                content = msgData["content"]["description"] || null;
+                content = msgData["content"]["title"] || null;
 
                 // Tạo thư mục nếu chưa có
                 if (!fs.existsSync(downloadDir)) {
