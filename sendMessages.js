@@ -59,6 +59,10 @@ export async function processPendingMessages(instances) {
                         if (!result || !result.uid) throw new Error('Không tìm thấy người dùng');
 
                         // await insertAlias(zalo_receiver, result.uid, result.zalo_name);
+                        const checkAlias = await findAliasByUid(result.uid);
+                        if (!checkAlias) {
+                            await insertAlias(zalo_receiver, result.uid, result.zalo_name);
+                        }
                         alias = { phone: zalo_receiver, uid: result.uid, zaloname: result.zalo_name };
 
 
@@ -67,11 +71,14 @@ export async function processPendingMessages(instances) {
                         const result = await api.getUserInfo(userId);
                         if (!result || !result.changed_profiles) throw new Error('Không tìm thấy người dùng');
                         const zaloName = result.changed_profiles?.[userId]?.zaloName;
+                        const checkAlias = await findAliasByUid(userId);
+                        if (!checkAlias) {
+                            await insertAlias(null, userId, zaloName);
+                        }
 
                         // await insertAlias(result.zalo_name, result.uid, result.zalo_name);
                         alias = {
                             phone: null, uid: userId, zaloname: zaloName
-
                         }
                     }
 
